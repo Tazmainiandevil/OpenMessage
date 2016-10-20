@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace OpenMessage
 {
-    internal abstract class ManagedObservable<T> : IObservable<T>, IDisposable
+    public abstract class ManagedObservable<T> : IObservable<T>, IDisposable
     {
         private readonly ILogger<ManagedObservable<T>> _logger;
         private readonly HashSet<IObserver<T>> _observers = new HashSet<IObserver<T>>();
@@ -45,7 +45,7 @@ namespace OpenMessage
                 foreach (var observer in _observers)
                     try
                     {
-                        observer.OnNext(entity);
+                        Notify(observer.OnNext, entity);
                     }
                     catch (Exception ex)
                     {
@@ -57,6 +57,8 @@ namespace OpenMessage
                     throw new AggregateException(errors);
             }
         }
+
+        protected virtual void Notify(Action<T> action, T entity) => action(entity);
 
         public void Dispose()
         {
